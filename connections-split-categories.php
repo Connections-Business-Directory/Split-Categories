@@ -352,13 +352,13 @@ if ( ! class_exists( 'Connections_Split_Categories' ) ) {
 				cnMetaboxAPI::remove( 'categorydiv' );
 				cnMetaboxAPI::add(
 					array(
-						'id'       => 'categorydiv',
-						'title'    => __( 'Categories', 'connections' ),
-						'exclude'  => $exclude,
-						'pages'    => $pages,
-						'context'  => 'side',
-						'priority' => 'core',
-						'callback' => array( 'cnEntryMetabox', 'category' ),
+						'id'           => 'categorydiv',
+						'title'        => __( 'Categories', 'connections' ),
+						'exclude_tree' => $exclude,
+						'pages'        => $pages,
+						'context'      => 'side',
+						'priority'     => 'core',
+						'callback'     => array( 'cnEntryMetabox', 'category' ),
 					)
 				);
 			}
