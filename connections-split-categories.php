@@ -492,7 +492,8 @@ if ( ! class_exists( 'Connections_Split_Categories' ) ) {
 			foreach ( $terms as $term ) {
 
 				if ( $category->term_id == $term->term_id ||
-				     cnTerm::isAncestorOf( $term->term_id, $category->term_id, 'category') ) {
+				     cnTerm::isAncestorOf( $term->term_id, $category->term_id, 'category' )
+				) {
 
 					return '';
 				}
