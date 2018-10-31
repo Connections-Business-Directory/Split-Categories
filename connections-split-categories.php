@@ -378,7 +378,7 @@ if ( ! class_exists( 'Connections_Split_Categories' ) ) {
 		public static function field( $field, $value, $entry ) {
 
 			$atts = array(
-				'parent'   => absint( $field['category'] ),
+				'child_of' => absint( $field['category'] ),
 				'selected' => cnTerm::getRelationships( $entry->getID(), 'category', array( 'fields' => 'ids' ) ),
 			);
 
