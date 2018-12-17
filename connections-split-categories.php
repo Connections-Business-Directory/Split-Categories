@@ -383,8 +383,8 @@ if ( ! class_exists( 'Connections_Split_Categories' ) ) {
 			);
 
 			?>
-			<div class="categorydiv" id="taxonomy-category-<?php echo $atts['parent'] ; ?>">
-				<div id="category-id-<?php echo $atts['parent'] ; ?>" class="tabs-panel" style="max-height: 300px; overflow-y: scroll;">
+			<div class="categorydiv" id="taxonomy-category-<?php echo $atts['child_of'] ; ?>">
+				<div id="category-id-<?php echo $atts['child_of'] ; ?>" class="tabs-panel" style="max-height: 300px; overflow-y: scroll;">
 					<?php cnTemplatePart::walker( 'term-checklist', $atts ); ?>
 				</div>
 			</div>
