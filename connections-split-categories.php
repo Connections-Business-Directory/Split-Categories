@@ -22,6 +22,9 @@
  * Domain Path:       /languages
  */
 
+use Connections_Directory\Content_Blocks\Entry\Categories as Entry_Categories;
+use Connections_Directory\Utility\_escape;
+
 if ( ! class_exists( 'Connections_Split_Categories' ) ) {
 
 	final class Connections_Split_Categories {
@@ -397,8 +400,9 @@ if ( ! class_exists( 'Connections_Split_Categories' ) ) {
 		 * Add the custom meta as an option in the content block settings in the admin.
 		 * This is required for the output to be rendered by $entry->getContentBlock().
 		 *
-		 * @access private
-		 * @since  1.0
+		 * @internal
+		 * @since 1.0
+		 * @since 1.1 Register the "As Image Grid" options.
 		 *
 		 * @param array $blocks An associative array containing the registered content block settings options.
 		 *
@@ -406,9 +410,18 @@ if ( ! class_exists( 'Connections_Split_Categories' ) ) {
 		 */
 		public static function registerContentBlockOptions( $blocks ) {
 
+			$hasEnhancedCategories = class_exists( 'Connections_Categories' );
+
 			foreach ( self::getSplitCategories() as $term ) {
 
 				$blocks["category-id-{$term->term_id}"] = $term->name;
+
+				if ( $hasEnhancedCategories ) {
+
+					$name = is_admin() ? sprintf( __( '%s as Image Grid', 'connections-split-categories' ), $term->name ) : $term->name;
+
+					$blocks["category-id-{$term->term_id}-as-image-grid"] = $name;
+				}
 			}
 
 			return $blocks;
@@ -420,14 +433,31 @@ if ( ! class_exists( 'Connections_Split_Categories' ) ) {
 		 * Add the action that'll be run when calling $entry->getContentBlock( 'category-id-{$term->term_id}' )
 		 * from within a template.
 		 *
-		 * @access private
-		 * @since  1.0
+		 * @internal
+		 * @since 1.0
+		 * @since 1.1 Register the "As Image Grid" action hooks.
 		 */
 		public static function registerContentBlock() {
+
+			$hasEnhancedCategories = class_exists( 'Connections_Categories' );
 
 			foreach ( self::getSplitCategories() as $term ) {
 
 				add_action( "cn_entry_output_content-category-id-{$term->term_id}", array( __CLASS__, 'contentBlock' ), 10, 3 );
+
+				if ( $hasEnhancedCategories ) {
+
+					add_action(
+						"cn_entry_output_content-category-id-{$term->term_id}-as-image-grid",
+						array(
+							__CLASS__,
+							'contentBlockAsImageGrid'
+						),
+						10,
+						3
+					);
+
+				}
 			}
 		}
 
@@ -461,6 +491,108 @@ if ( ! class_exists( 'Connections_Split_Categories' ) ) {
 						'label'    => '',
 					)
 				);
+
+				// Add the filter which removes the split categories from cnOutput::getCategoryBlock().
+				add_filter( 'cn_entry_output_category_item', array( __CLASS__, 'removeCategoryItem' ), 10, 6 );
+			}
+		}
+
+		/**
+		 * Callback for the `cn_entry_output_content-{id}` filter in @see cnOutput::getCategoryBlock()
+		 *
+		 * Renders the Facilities content block.
+		 * Modelled after the @see cnOutput::getCategoryBlock()
+		 *
+		 * @internal
+		 * @since 1.1
+		 *
+		 * @param cnOutput   $entry
+		 * @param array      $atts The shortcode atts array passed from the calling action.
+		 * @param cnTemplate $template
+		 */
+		public static function contentBlockAsImageGrid( $entry, $atts, $template ) {
+
+			$hasEnhancedCategories = class_exists( 'Connections_Categories' );
+			$matches               = array();
+
+			if ( preg_match( '#(\d+)-as-image-grid$#', current_action(), $matches ) && $hasEnhancedCategories ) {
+
+				// Remove the filter from cnOutput::getCategoryBlock().
+				remove_filter( 'cn_entry_output_category_item', array( __CLASS__, 'removeCategoryItem' ), 10 );
+
+				/**
+				 * @param string[] $class An array of class names.
+				 *
+				 * @return string[]
+				 */
+				$classCallback = static function( array $class ) {
+
+					$class[] = 'cn-category-image-container';
+
+					return $class;
+				};
+
+				/**
+				 * @param string           $html       The item HTML.
+				 * @param cnTerm_Object    $term       The current term.
+				 * @param int              $count      The number of category terms attached to an entry.
+				 * @param int              $i          The current category iteration.
+				 * @param array            $properties The properties of the current Entry Categories Content Block.
+				 * @param Entry_Categories $block      An instance of the Entry Categories Content Block.
+				 *
+				 * @return string
+				 */
+				$itemCallback = static function( string $html, cnTerm_Object $term, int $count, int $i, array $properties, Entry_Categories $block ) use ( $entry ) {
+
+					global $wp_rewrite;
+
+					$name  = '<span class="cn-term-name">' . esc_html( $term->name ) . '</span>';
+					$image = Connections_Categories::getImageHTML( $term->term_id );
+					$text  = '';
+
+					if ( $block->get( 'link' ) ) {
+
+						$rel = is_object( $wp_rewrite ) && $wp_rewrite->using_permalinks() ? 'rel="category tag"' : 'rel="category"';
+
+						$url = cnTerm::permalink(
+							$term,
+							'category',
+							array(
+								'force_home' => $entry->directoryHome['force_home'],
+								'home_id'    => $entry->directoryHome['page_id'],
+							)
+						);
+
+						$text .= '<a href="' . $url . '" ' . $rel . '>' . $image . $name . '</a>';
+
+					} else {
+
+						$text .= $image . $name;
+					}
+
+					return sprintf(
+						'<%1$s class="%2$s">%3$s</%1$s>',
+						_escape::tagName( $block->get( 'item_tag' ) ),
+						// The `cn_category` class is named with an underscore for backward compatibility.
+						_escape::classNames( "cn-category-name cn_category cn-category-{$term->term_id} cn-category-{$term->slug} cn-category-image-block" ),
+						// `$text` is escaped.
+						$text
+					);
+				};
+
+				add_filter( 'cn_entry_output_category_items_class', $classCallback );
+				add_filter( 'cn_entry_output_category_item', $itemCallback, 10, 6 );
+
+				$entry->getCategoryBlock(
+					array(
+						'child_of' => $matches[1],
+						'type' => 'list',
+						'label' => '',
+					)
+				);
+
+				remove_filter( 'cn_entry_output_category_item', $itemCallback );
+				remove_filter( 'cn_entry_output_category_items_class', $classCallback );
 
 				// Add the filter which removes the split categories from cnOutput::getCategoryBlock().
 				add_filter( 'cn_entry_output_category_item', array( __CLASS__, 'removeCategoryItem' ), 10, 6 );
