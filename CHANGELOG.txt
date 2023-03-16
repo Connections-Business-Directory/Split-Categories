@@ -1,4 +1,11 @@
 == Changelog ==
 
+= 1.1 03/16/2023 =
+* NEW: Add integration with the Enhance categories add-on by registering "As Image Grid" for each split categories.
+* BUG: The entire category tree needs to be excluded, not just the individual categories that were split.
+* BUG: Display all children categories if the selected parent category to split not just the direct descendants.
+* BUG: Correct undefined index notice.
+* TWEAK: Remove use of `create_function()`.
+
 = 1.0 09/15/2017 =
 * Initial commit.
