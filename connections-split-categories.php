@@ -13,7 +13,7 @@
  * Plugin Name:       Connections Business Directory Split Categories
  * Plugin URI:        http://connections-pro.com
  * Description:       An extension for the Connections Business Directory which splits parent categories into their own metaboxes.
- * Version:           1.0
+ * Version:           1.1
  * Author:            Steven A. Zahm
  * Author URI:        http://connections-pro.com
  * License:           GPL-2.0+
@@ -29,7 +29,7 @@ if ( ! class_exists( 'Connections_Split_Categories' ) ) {
 
 	final class Connections_Split_Categories {
 
-		const VERSION = '1.0';
+		const VERSION = '1.1';
 
 		/**
 		 * Stores the instance of this class.
