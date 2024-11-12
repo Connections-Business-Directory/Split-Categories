@@ -167,7 +167,7 @@ if ( ! class_exists( 'Connections_Split_Categories' ) ) {
 				'desc'      => __( 'Whether or not to display the Categories metabox when adding or editing an entry.', 'connections-split-categories' ),
 				'help'      => __( 'Check this option if you wish to hide the display of the Categories metabox.', 'connections-split-categories' ),
 				'type'      => 'checkbox',
-				'default'   => 1
+				'default'   => 1,
 			);
 
 			$fields[] = array(
@@ -181,7 +181,7 @@ if ( ! class_exists( 'Connections_Split_Categories' ) ) {
 				'desc'      => __( 'Select the parent categories to split into their own metabox.', 'connections-split-categories' ),
 				//'help'      => __( 'Check this option if you wish to hide the display of the Categories metabox.', 'connections-split-categories' ),
 				'type'      => 'split-category-repeatable',
-				'default'   => array()
+				'default'   => array(),
 			);
 
 			return $fields;
@@ -451,7 +451,7 @@ if ( ! class_exists( 'Connections_Split_Categories' ) ) {
 						"cn_entry_output_content-category-id-{$term->term_id}-as-image-grid",
 						array(
 							__CLASS__,
-							'contentBlockAsImageGrid'
+							'contentBlockAsImageGrid',
 						),
 						10,
 						3
