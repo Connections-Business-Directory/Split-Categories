@@ -80,6 +80,9 @@ if ( ! class_exists( 'Connections_Split_Categories' ) ) {
 				// Register the callback for the category checklist.
 				add_action( 'cn_meta_field-category_checklist', array( __CLASS__, 'field' ), 10, 3 );
 
+				// Add filter to remove the split categories from the Form add-on custom category select.
+				add_filter( 'Connections_Directory/Form/Metabox/Category/Options', array( __CLASS__, 'formAddon' ) );
+
 				// Since we're using a custom field, we need to add our own sanitization method.
 				add_filter( 'cn_meta_sanitize_field-category_checklist', array( __CLASS__, 'sanitize') );
 
@@ -305,6 +308,27 @@ if ( ! class_exists( 'Connections_Split_Categories' ) ) {
 			}
 
 			return $fields;
+		}
+
+		/**
+		 * Exclude split categories on the Form add-on custom category select.
+		 *
+		 * @param array $options
+		 *
+		 * @return array
+		 */
+		public static function formAddon( $options ) {
+
+			$exclude = array();
+
+			foreach ( self::getSplitCategories() as $term ) {
+
+				$exclude[] = $term->term_id;
+			}
+
+			$options['exclude_tree'] = $exclude;
+
+			return $options;
 		}
 
 		public static function metabox() {
